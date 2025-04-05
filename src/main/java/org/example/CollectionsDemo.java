@@ -63,13 +63,19 @@ public class CollectionsDemo {
         return people;
     }
 
-    public static ArrayList<TreeSet<Human>> getSortedSet(HashSet<Human> humans){
+    public static ArrayList<Human> getSortedSet(HashSet<Human> humans){
         if (humans == null|| humans.isEmpty()) throw new IllegalArgumentException("humans is empty");
-        ArrayList<TreeSet<Human>> people = new ArrayList<>(humans.size());
-        for (TreeSet <Human> human : people){
-            people.add(human);
+        TreeSet<Human> treeSet = new TreeSet<>();
+        ArrayList<Human> result = new ArrayList<>();
+
+        for(Human human : humans){
+            treeSet.add(human);
         }
-        return people;
+
+        for(Human human : treeSet){
+            result.add(human);
+        }
+        return result;
     }
 
 }
