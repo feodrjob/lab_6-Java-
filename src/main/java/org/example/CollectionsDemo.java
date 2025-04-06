@@ -1,8 +1,7 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.TreeSet;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class CollectionsDemo {
     public static int getCountDtringsForFirstSymbol(ArrayList<String> strings, char value) {
@@ -77,5 +76,46 @@ public class CollectionsDemo {
         }
         return result;
     }
+
+    public static HashSet<Human> getSetOfPeopleByIdentifier(Map<Integer,Human> humanMap, Set<Integer> nums){
+        if (humanMap.isEmpty() || humanMap == null) throw new IllegalArgumentException("human is Empty");
+
+        HashSet<Human> result = new HashSet<>();
+
+        for (Integer num : nums){
+            if(humanMap.containsKey(num)) result.add(humanMap.get(num));
+        }
+        return result;
+    }
+
+    public static HashSet<Human> getSetOfPeopleOlder18(Map<Integer,Human> humanMap){
+        if (humanMap.isEmpty() || humanMap == null) throw new IllegalArgumentException("human is Empty");
+
+        HashSet<Human> result = new HashSet<>();
+
+        for (Map.Entry<Integer,Human> man : humanMap.entrySet()){
+            if(man.getValue().getAge()>=18) result.add(humanMap.get(man.getKey()));
+        }
+        return result;
+    }
+
+    public static Map<Integer,Human> changeKeysOnAge(Map<Integer,Human> humanMap){
+        if (humanMap.isEmpty() || humanMap == null) throw new IllegalArgumentException("human is Empty");
+        Map<Integer,Human> result = new HashMap<>();
+
+        for(Integer key : humanMap.keySet()){
+            result.put(key,humanMap.get(humanMap.keySet()));
+        }
+        return result;
+
+    }
+
+
+
+
+
+
+
+
 
 }
