@@ -2,7 +2,7 @@ package org.example;
 
 import java.util.Objects;
 
-public class Human {
+public class Human implements Comparable<Human>{
     private String surname, name, secondname;
     private int age;
 
@@ -63,4 +63,21 @@ public class Human {
     public int hashCode() {
         return Objects.hash(surname, name, secondname, age);
     }
+    @Override
+    public int compareTo(Human other) {
+        // Сравниваем по ФИО (сначала фамилия, потом имя, потом отчество)
+        int surnameCompare = this.surname.compareTo(other.surname);
+        if (surnameCompare != 0) {
+            return surnameCompare;
+        }
+
+        int nameCompare = this.name.compareTo(other.name);
+        if (nameCompare != 0) {
+            return nameCompare;
+        }
+
+        return this.secondname.compareTo(other.secondname);
+    }
+
+
 }

@@ -19,8 +19,8 @@ public class CollectionsDemo {
         ArrayList<Human> namesakes = new ArrayList<>();
         for (Human realman : humans) {
             if (realman == null) throw new IllegalArgumentException("Human is empty");
-            if (man.getSecondname() == realman.getSecondname()) {
-
+            if (man.getSurname() == realman.getSurname()) {
+                namesakes.add(realman);
             }
         }
         return namesakes;
@@ -99,16 +99,43 @@ public class CollectionsDemo {
         return result;
     }
 
-    public static Map<Integer,Human> changeKeysOnAge(Map<Integer,Human> humanMap){
+    public static Map<Integer,Integer> changeKeysOnAge(Map<Integer,Human> humanMap){
         if (humanMap.isEmpty() || humanMap == null) throw new IllegalArgumentException("human is Empty");
-        Map<Integer,Human> result = new HashMap<>();
+        Map<Integer,Integer> result = new HashMap<>();
 
-        for(Integer key : humanMap.keySet()){
-            result.put(key,humanMap.get(humanMap.keySet()));
+        Set<Integer> buf = new HashSet<>();
+        buf = humanMap.keySet();
+
+        for(Integer key : buf){
+            result.put(key,humanMap.get(key).getAge());
         }
         return result;
 
     }
+
+    public static Map<Integer,ArrayList<Human>> getMapAge(HashSet<Human> humans){
+        if (humans.isEmpty() || humans == null) throw new IllegalArgumentException("human is Empty");
+
+        HashMap<Integer,ArrayList<Human>> result = new HashMap<>();
+        ArrayList<Integer> ageList = new ArrayList<>();
+
+        for (Human human : humans){
+            ageList.add(human.getAge());
+        }
+
+        for (Integer age : ageList){
+            ArrayList<Human> oneAge = new ArrayList<>();
+            for (Human human : humans){
+                if(age == human.getAge()) oneAge.add(human);
+            }
+            result.put(age,oneAge);
+        }
+        return result;
+    }
+
+
+
+
 
 
 

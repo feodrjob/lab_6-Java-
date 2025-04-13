@@ -12,11 +12,11 @@ public class stringStartWithTest {
 
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         strings = new ArrayList<>();
         strings.add("aaa");
         strings.add("bbc");
-        //strings.add("");
+        //
         strings.add("aba");
         strings.add("bab");
     }
@@ -25,4 +25,10 @@ public class stringStartWithTest {
     public void getCountDtringsForFirstSymboltest1(){
         Assert.assertEquals(2,getCountDtringsForFirstSymbol(strings,'a'));
     }
+
+    @Test
+    public void getCountDtringsForFirstSymboltest2(){
+        Assert.assertEquals(0,getCountDtringsForFirstSymbol(strings,'c'));
+    }
+
 }
