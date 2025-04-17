@@ -6,8 +6,9 @@ import java.util.*;
 public class CollectionsDemo {
     public static int getCountDtringsForFirstSymbol(ArrayList<String> strings, char value) {
         int count = 0;
+        if (strings.isEmpty()) throw new IllegalArgumentException("String is empty");
+
         for (String string : strings) {
-            if (string.isEmpty()) throw new IllegalArgumentException("String is empty");
             if (string.startsWith(String.valueOf(value))) {
                 count += 1;
             }
@@ -17,21 +18,22 @@ public class CollectionsDemo {
 
     public static ArrayList<Human> getNamesakes(ArrayList<Human> humans, Human man) {
         ArrayList<Human> namesakes = new ArrayList<>();
+        if (humans.isEmpty()) throw new IllegalArgumentException("Human is empty");
         for (Human realman : humans) {
-            if (realman == null) throw new IllegalArgumentException("Human is empty");
-            if (man.getSurname() == realman.getSurname()) {
+
+            if (Objects.equals(man.getSurname(), realman.getSurname())) {
                 namesakes.add(realman);
             }
         }
         return namesakes;
     }
 
-    public static ArrayList<HashSet<Integer>> getListOfSets(ArrayList<HashSet<Integer>> setarrylist, HashSet<Integer> oneset) {
+    public static List<Set<Integer>> getListOfSets(List<Set<Integer>> setarrylist, Set<Integer> oneset) {
         if (setarrylist.isEmpty()) throw new IllegalArgumentException("Sets is empty");
         if (oneset.isEmpty()) throw new IllegalArgumentException("Set is empty");
-        ArrayList<HashSet<Integer>> setWithoutIntersections = new ArrayList<>();
+        List<Set<Integer>> setWithoutIntersections = new ArrayList<>();
         boolean flag = true;
-        for (HashSet<Integer> set : setarrylist){
+        for (Set<Integer> set : setarrylist){
             for (Integer num : oneset){
                 if(set.contains(num)) {
                     flag = false;
@@ -47,7 +49,7 @@ public class CollectionsDemo {
         return setWithoutIntersections;
     }
 
-    public static ArrayList<?extends Human> getPeoplesByMaxAge(HashSet<Human> humans){
+    public static ArrayList<?extends Human> getPeoplesByMaxAge(Set<Human> humans){
         if (humans == null|| humans.isEmpty()) throw new IllegalArgumentException("humans is empty");
         int maxAge = 0;
         ArrayList<Human> people = new ArrayList<>();
@@ -62,34 +64,29 @@ public class CollectionsDemo {
         return people;
     }
 
-    public static ArrayList<Human> getSortedSet(HashSet<Human> humans){
+    public static ArrayList<Human> getSortedSet(Set<Human> humans){
         if (humans == null|| humans.isEmpty()) throw new IllegalArgumentException("humans is empty");
-        TreeSet<Human> treeSet = new TreeSet<>();
-        ArrayList<Human> result = new ArrayList<>();
 
-        for(Human human : humans){
-            treeSet.add(human);
-        }
+        TreeSet<Human> treeSet = new TreeSet<>(humans);
 
-        for(Human human : treeSet){
-            result.add(human);
-        }
-        return result;
+        return new ArrayList<>(treeSet);
     }
 
     public static HashSet<Human> getSetOfPeopleByIdentifier(Map<Integer,Human> humanMap, Set<Integer> nums){
-        if (humanMap.isEmpty() || humanMap == null) throw new IllegalArgumentException("human is Empty");
+        if (humanMap.isEmpty()) throw new IllegalArgumentException("human is Empty");
 
         HashSet<Human> result = new HashSet<>();
 
         for (Integer num : nums){
-            if(humanMap.containsKey(num)) result.add(humanMap.get(num));
+            if(humanMap.containsKey(num)) {
+                result.add(humanMap.get(num));
+            }
         }
         return result;
     }
 
     public static HashSet<Human> getSetOfPeopleOlder18(Map<Integer,Human> humanMap){
-        if (humanMap.isEmpty() || humanMap == null) throw new IllegalArgumentException("human is Empty");
+        if (humanMap.isEmpty()) throw new IllegalArgumentException("human is Empty");
 
         HashSet<Human> result = new HashSet<>();
 
@@ -100,7 +97,7 @@ public class CollectionsDemo {
     }
 
     public static Map<Integer,Integer> changeKeysOnAge(Map<Integer,Human> humanMap){
-        if (humanMap.isEmpty() || humanMap == null) throw new IllegalArgumentException("human is Empty");
+        if (humanMap.isEmpty()) throw new IllegalArgumentException("human is Empty");
         Map<Integer,Integer> result = new HashMap<>();
 
         Set<Integer> buf = new HashSet<>();
@@ -113,8 +110,8 @@ public class CollectionsDemo {
 
     }
 
-    public static Map<Integer,ArrayList<Human>> getMapAge(HashSet<Human> humans){
-        if (humans.isEmpty() || humans == null) throw new IllegalArgumentException("human is Empty");
+    public static Map<Integer,ArrayList<Human>> getMapAge(Set<Human> humans){
+        if (humans.isEmpty()) throw new IllegalArgumentException("human is Empty");
 
         HashMap<Integer,ArrayList<Human>> result = new HashMap<>();
         ArrayList<Integer> ageList = new ArrayList<>();
@@ -131,6 +128,26 @@ public class CollectionsDemo {
             result.put(age,oneAge);
         }
         return result;
+    }
+
+    public static Map<Integer,Map<Character,ArrayList<Human>>> getAgeHumanToLetter(Set<Human> humans){
+        if (humans.isEmpty()) throw new IllegalArgumentException("human is Empty");
+
+        HashMap<Integer,HashMap<Character,ArrayList<Human>>> result = new HashMap<>();
+        ArrayList<Integer> ages = new ArrayList<>();
+
+        for (Human human : humans){
+            ages.add(human.getAge());
+        }
+
+        for (Integer age : ages){
+            HashMap<Character,Human> secondmap = new HashMap<>();
+            for (Human human : humans){
+                //if (age == human.getAge() && )
+            }
+        }
+        return null;
+
     }
 
 

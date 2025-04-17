@@ -3,103 +3,97 @@ package org.example;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.example.CollectionsDemo.changeKeysOnAge;
+import static org.example.CollectionsDemo.getSetOfPeopleOlder18;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.*;
 
 public class HumanAgeMappingTest {
-
     private Map<Integer, Human> humanMap;
-    private Map<Integer, Human> emptyMap;
-    private Map<Integer, Human> singleEntryMap;
-    private Map<Integer, Human> duplicatesAgeMap;
+    private Human adult1;
+    private Human adult2;
+    private Human child;
+    private Student adultStudent;
 
     @BeforeEach
     public void setUp() {
-        // Основная тестовая мапа
+        // Инициализация тестовых данных
+        adult1 = new Human("Ivanov", "Ivan", "Ivanovich", 25);
+        adult2 = new Human("Petrov", "Petr", "Petrovich", 30);
+        child = new Human("Sidorov", "Sidor", "Sidorovich", 17);
+        adultStudent = new Student("Abramov", "Alex", "Sergeevich", 19, "CS");
+
         humanMap = new HashMap<>();
-        humanMap.put(101, new Human("Smith", "John", "M", 30));
-        humanMap.put(102, new Student("Johnson", "Alice", "P", 20, "CS"));
-        humanMap.put(103, new Human("Williams", "Bob", "Q", 25));
-
-        // Пустая мапа
-        emptyMap = Collections.emptyMap();
-
-        // Мапа с одним элементом
-        singleEntryMap = new HashMap<>();
-        singleEntryMap.put(1, new Human("Doe", "Jane", "R", 40));
-
-        // Мапа с повторяющимися возрастами
-        duplicatesAgeMap = new HashMap<>();
-        duplicatesAgeMap.put(201, new Human("Brown", "Emma", "S", 22));
-        duplicatesAgeMap.put(202, new Student("Davis", "Liam", "T", 22, "Math"));
+        humanMap.put(1, adult1);
+        humanMap.put(2, adult2);
+        humanMap.put(3, child);
+        humanMap.put(4, adultStudent);
     }
 
     @Test
-    public void testChangeKeysOnAge_NormalCase() {
-        Map<Integer, Integer> result = changeKeysOnAge(humanMap);
+    public void testReturnsOnlyAdults() {
+        HashSet<Human> expected = new HashSet<>();
+        expected.add(adult1);
+        expected.add(adult2);
+        expected.add(adultStudent);
 
-        assertEquals(3, result.size());
-        assertEquals(30, result.get(101));
-        assertEquals(20, result.get(102));
-        assertEquals(25, result.get(103));
-        assertNull(result.get(999)); // Несуществующий ключ
+        HashSet<Human> result = getSetOfPeopleOlder18(humanMap);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testChangeKeysOnAge_SingleEntry() {
-        Map<Integer, Integer> result = changeKeysOnAge(singleEntryMap);
+    public void testBoundaryAge18() {
+        Human exactly18 = new Human("Kuznetsov", "Alex", "Sergeevich", 18);
+        humanMap.put(5, exactly18);
 
-        assertEquals(1, result.size());
-        assertEquals(40, result.get(1));
+        HashSet<Human> result = getSetOfPeopleOlder18(humanMap);
+        assertTrue(result.contains(exactly18));
     }
 
     @Test
-    public void testChangeKeysOnAge_DuplicateAges() {
-        Map<Integer, Integer> result = changeKeysOnAge(duplicatesAgeMap);
-
-        assertEquals(2, result.size());
-        assertEquals(22, result.get(201));
-        assertEquals(22, result.get(202));
+    public void testExcludesChildren() {
+        HashSet<Human> result = getSetOfPeopleOlder18(humanMap);
+        assertFalse(result.contains(child));
     }
 
     @Test
-    public void testChangeKeysOnAge_EmptyMap() {
+    public void testEmptyMap() {
+        humanMap.clear();
         assertThrows(IllegalArgumentException.class, () -> {
-            changeKeysOnAge(emptyMap);
+            getSetOfPeopleOlder18(humanMap);
         });
     }
 
-
     @Test
-    public void testChangeKeysOnAge_WithStudents() {
-        Map<Integer, Human> studentMap = new HashMap<>();
-        studentMap.put(301, new Student("Wilson", "Eva", "U", 19, "Physics"));
-
-        Map<Integer, Integer> result = changeKeysOnAge(studentMap);
-
-        assertEquals(1, result.size());
-        assertEquals(19, result.get(301));
+    public void testNullInput() {
+        assertThrows(NullPointerException.class, () -> {
+            getSetOfPeopleOlder18(null);
+        });
     }
 
     @Test
-    public void testChangeKeysOnAge_CheckImmutableInput() {
-        // Создаем копию для проверки, что исходная мапа не изменилась
-        Map<Integer, Human> original = new HashMap<>(humanMap);
-        changeKeysOnAge(humanMap);
+    public void testAllAdults() {
+        humanMap.remove(3); // Удаляем ребенка
 
-        assertEquals(original, humanMap);
+        HashSet<Human> result = getSetOfPeopleOlder18(humanMap);
+        assertEquals(3, result.size());
     }
 
     @Test
-    public void testChangeKeysOnAge_ZeroAge() {
-        Map<Integer, Human> zeroAgeMap = new HashMap<>();
-        zeroAgeMap.put(401, new Human("Taylor", "Roy", "V", 0));
+    public void testAllChildren() {
+        humanMap.clear();
+        humanMap.put(1, new Human("A", "B", "C", 16));
+        humanMap.put(2, new Human("D", "E", "F", 17));
 
-        Map<Integer, Integer> result = changeKeysOnAge(zeroAgeMap);
+        HashSet<Human> result = getSetOfPeopleOlder18(humanMap);
+        assertTrue(result.isEmpty());
+    }
 
-        assertEquals(1, result.size());
-        assertEquals(0, result.get(401));
+    @Test
+    public void testDuplicateAdults() {
+        humanMap.put(5, adult1); // Дубликат adult1 с другим ID
+
+        HashSet<Human> result = getSetOfPeopleOlder18(humanMap);
+        assertEquals(3, result.size()); // Дубликаты автоматически удаляются
     }
 }

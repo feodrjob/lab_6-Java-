@@ -1,102 +1,86 @@
 package org.example;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.example.CollectionsDemo.getPeoplesByMaxAge;
 import static org.junit.jupiter.api.Assertions.*;
-import java.util.HashSet;
-import java.util.ArrayList;
+import java.util.*;
 
-class ListDemoTest {
+public class ListDemoTest {
+    private Set<Human> humans;
+    private Human ivanov;
+    private Human petrov;
+    private Human sidorov;
+    private Student student;
 
-    @Test
-    void testEmptyInput() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            getPeoplesByMaxAge(new HashSet<>());
-        });
+    @BeforeEach
+    public void setUp() {
+        ivanov = new Human("Ivanov", "Ivan", "Ivanovich", 20);
+        petrov = new Human("Petrov", "Petr", "Petrovich", 25);
+        sidorov = new Human("Sidorov", "Sidor", "Sidorovich", 25);
+        student = new Student("Kuznetsov", "Alex", "Sergeevich", 30, "Computer Science");
+
+        humans = new HashSet<>();
+        humans.add(ivanov);
+        humans.add(petrov);
+        humans.add(sidorov);
     }
 
     @Test
-    void testNullInput() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            getPeoplesByMaxAge(null);
-        });
+    public void testBasicFunctionality() {
+        ArrayList<Human> expected = new ArrayList<>(Arrays.asList(petrov, sidorov));
+        ArrayList<Human> result = new ArrayList<>(getPeoplesByMaxAge(humans));
+
+        // Сортируем для стабильного сравнения
+        expected.sort(Human::compareTo);
+        result.sort(Human::compareTo);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    void testSingleHuman() {
-        HashSet<Human> humans = new HashSet<>();
-        humans.add(new Human("Ivanov", "Ivan", "Ivanovich", 30));
+    public void testSingleMaxAge() {
+        humans.remove(sidorov);
+        ArrayList<Human> expected = new ArrayList<>(Collections.singletonList(petrov));
+        ArrayList<Human> result = new ArrayList<>(getPeoplesByMaxAge(humans));
 
-        ArrayList<?extends Human> result = getPeoplesByMaxAge(humans);
-
-        assertEquals(1, result.size());
-        assertEquals(30, result.get(0).getAge());
+        assertEquals(expected, result);
     }
 
     @Test
-    void testSingleStudent() {
-        HashSet<Human> humans = new HashSet<>();
-        humans.add(new Student("Petrov", "Petr", "Petrovich", 25, "Computer Science"));
+    public void testWithStudents() {
+        humans.add(student);
+        ArrayList<Human> expected = new ArrayList<>(Collections.singletonList(student));
+        ArrayList<Human> result = new ArrayList<>(getPeoplesByMaxAge(humans));
 
-        ArrayList<?extends Human> result = getPeoplesByMaxAge(humans);
-
-        assertEquals(1, result.size());
-        assertEquals(25, result.get(0).getAge());
-        assertTrue(result.get(0) instanceof Student);
+        assertEquals(expected, result);
     }
 
     @Test
-    void testMultipleHumansSameAge() {
-        HashSet<Human> humans = new HashSet<>();
-        humans.add(new Human("Ivanov", "Ivan", "Ivanovich", 30));
-        humans.add(new Human("Petrov", "Petr", "Petrovich", 30));
-        humans.add(new Human("Sidorov", "Sidor", "Sidorovich", 30));
+    public void testAllSameAge() {
+        ivanov.setAge(30);
+        petrov.setAge(30);
+        sidorov.setAge(30);
 
-        ArrayList<?extends Human> result = getPeoplesByMaxAge(humans);
+        ArrayList<Human> expected = new ArrayList<>(humans);
+        ArrayList<Human> result = new ArrayList<>(getPeoplesByMaxAge(humans));
 
-        assertEquals(3, result.size());
-        assertEquals(30, result.get(0).getAge());
-        assertEquals(30, result.get(1).getAge());
-        assertEquals(30, result.get(2).getAge());
+        // Сортируем для стабильного сравнения
+        expected.sort(Human::compareTo);
+        result.sort(Human::compareTo);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    void testMixedHumansAndStudents() {
-        HashSet<Human> humans = new HashSet<>();
-        humans.add(new Human("Ivanov", "Ivan", "Ivanovich", 30));
-        humans.add(new Student("Petrov", "Petr", "Petrovich", 35, "Physics"));
-        humans.add(new Human("Sidorov", "Sidor", "Sidorovich", 25));
-        humans.add(new Student("Smirnov", "Alex", "Alexeevich", 35, "Mathematics"));
-
-        ArrayList<?extends Human> result = getPeoplesByMaxAge(humans);
-
-        assertEquals(2, result.size());
-        assertEquals(35, result.get(0).getAge());
-        assertEquals(35, result.get(1).getAge());
-
-        // Проверяем, что в результате есть оба человека с максимальным возрастом
-        boolean hasPetrov = result.stream().anyMatch(h ->
-                h.getSurname().equals("Petrov") && h.getName().equals("Petr"));
-        boolean hasSmirnov = result.stream().anyMatch(h ->
-                h.getSurname().equals("Smirnov") && h.getName().equals("Alex"));
-
-        assertTrue(hasPetrov);
-        assertTrue(hasSmirnov);
+    public void testEmptyInput() {
+        Set<Human> emptySet = Collections.emptySet();
+        assertThrows(IllegalArgumentException.class, () -> getPeoplesByMaxAge(emptySet));
     }
 
     @Test
-    void testDifferentAges() {
-        HashSet<Human> humans = new HashSet<>();
-        humans.add(new Human("Ivanov", "Ivan", "Ivanovich", 20));
-        humans.add(new Human("Petrov", "Petr", "Petrovich", 25));
-        humans.add(new Human("Sidorov", "Sidor", "Sidorovich", 30));
-        humans.add(new Human("Smirnov", "Alex", "Alexeevich", 25));
-
-        ArrayList<?extends Human> result = getPeoplesByMaxAge(humans);
-
-        assertEquals(1, result.size());
-        assertEquals(30, result.get(0).getAge());
-        assertEquals("Sidorov", result.get(0).getSurname());
+    public void testNullInput() {
+        assertThrows(IllegalArgumentException.class, () -> getPeoplesByMaxAge(null));
     }
 }

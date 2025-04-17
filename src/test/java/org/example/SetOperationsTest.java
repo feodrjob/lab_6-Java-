@@ -4,36 +4,41 @@ import org.junit.jupiter.api.Test;
 
 import static org.example.CollectionsDemo.getListOfSets;
 import static org.junit.jupiter.api.Assertions.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+
+import java.util.*;
 
 public class SetOperationsTest {
 
     @Test
     public void testNoIntersection() {
-        ArrayList<HashSet<Integer>> list = new ArrayList<>();
-        list.add(new HashSet<Integer>() {{ add(1); add(2); }});
-        list.add(new HashSet<Integer>() {{ add(3); add(4); }});
-        list.add(new HashSet<Integer>() {{ add(5); }});
+        List<Set<Integer>> list = Arrays.asList(
+                new HashSet<>(Arrays.asList(1, 2)),
+                new HashSet<>(Arrays.asList(3, 4)),
+                new HashSet<>(Collections.singletonList(5))
+        );
 
-        HashSet<Integer> testSet = new HashSet<Integer>() {{ add(6); add(7); }};
+        Set<Integer> testSet = new HashSet<>(Arrays.asList(9, 3));
 
-        ArrayList<HashSet<Integer>> result = getListOfSets(list, testSet);
+        List<Set<Integer>> result = getListOfSets(list, testSet);
 
-        assertEquals(3, result.size());
-        assertTrue(result.containsAll(list));
+        List<Set<Integer>> expected = Arrays.asList(
+                new HashSet<>(Arrays.asList(1, 2)),
+                new HashSet<>(Collections.singletonList(5))
+        );
+        assertEquals(expected, result);
     }
 
     @Test
     public void testSomeIntersection() {
-        ArrayList<HashSet<Integer>> list = new ArrayList<>();
-        list.add(new HashSet<Integer>() {{ add(1); add(2); }});
-        list.add(new HashSet<Integer>() {{ add(3); add(4); }});
-        list.add(new HashSet<Integer>() {{ add(5); }});
+        List<Set<Integer>> list = Arrays.asList(
+                new HashSet<>(Arrays.asList(1, 2)),
+                new HashSet<>(Arrays.asList(3, 4)),
+                new HashSet<>(Collections.singletonList(5))
+        );
 
-        HashSet<Integer> testSet = new HashSet<Integer>() {{ add(2); add(6); }};
+        Set<Integer> testSet = new HashSet<>(Arrays.asList(2, 6));
 
-        ArrayList<HashSet<Integer>> result = getListOfSets(list, testSet);
+        List<Set<Integer>> result = getListOfSets(list, testSet);
 
         assertEquals(2, result.size());
         assertTrue(result.contains(list.get(1)));
@@ -43,21 +48,22 @@ public class SetOperationsTest {
 
     @Test
     public void testAllIntersect() {
-        ArrayList<HashSet<Integer>> list = new ArrayList<>();
-        list.add(new HashSet<Integer>() {{ add(1); add(2); }});
-        list.add(new HashSet<Integer>() {{ add(2); add(3); }});
+        List<Set<Integer>> list = Arrays.asList(
+                new HashSet<>(Arrays.asList(1, 2)),
+                new HashSet<>(Arrays.asList(2, 3))
+        );
 
-        HashSet<Integer> testSet = new HashSet<Integer>() {{ add(2); }};
+        Set<Integer> testSet = new HashSet<>(Collections.singletonList(2));
 
-        ArrayList<HashSet<Integer>> result = getListOfSets(list, testSet);
+        List<Set<Integer>> result = getListOfSets(list, testSet);
 
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testEmptyInputList() {
-        ArrayList<HashSet<Integer>> list = new ArrayList<>();
-        HashSet<Integer> testSet = new HashSet<Integer>() {{ add(1); }};
+        List<Set<Integer>> list = Collections.emptyList();
+        Set<Integer> testSet = new HashSet<>(Collections.singletonList(1));
 
         assertThrows(IllegalArgumentException.class, () -> {
             getListOfSets(list, testSet);
@@ -66,10 +72,11 @@ public class SetOperationsTest {
 
     @Test
     public void testEmptyTestSet() {
-        ArrayList<HashSet<Integer>> list = new ArrayList<>();
-        list.add(new HashSet<Integer>() {{ add(1); }});
+        List<Set<Integer>> list = Collections.singletonList(
+                new HashSet<>(Collections.singletonList(1))
+        );
 
-        HashSet<Integer> testSet = new HashSet<>();
+        Set<Integer> testSet = Collections.emptySet();
 
         assertThrows(IllegalArgumentException.class, () -> {
             getListOfSets(list, testSet);
@@ -78,17 +85,16 @@ public class SetOperationsTest {
 
     @Test
     public void testEmptySetsInList() {
-        ArrayList<HashSet<Integer>> list = new ArrayList<>();
-        list.add(new HashSet<Integer>() {{ add(1); }});
-        list.add(new HashSet<Integer>());
+        List<Set<Integer>> list = Arrays.asList(
+                new HashSet<>(Collections.singletonList(1)),
+                new HashSet<>()
+        );
 
-        HashSet<Integer> testSet = new HashSet<Integer>() {{ add(2); }};
+        Set<Integer> testSet = new HashSet<>(Collections.singletonList(2));
 
-        // Пустое множество не пересекается ни с каким другим множеством
-        ArrayList<HashSet<Integer>> result = getListOfSets(list, testSet);
+        List<Set<Integer>> result = getListOfSets(list, testSet);
 
         assertEquals(2, result.size());
         assertTrue(result.containsAll(list));
     }
 }
-

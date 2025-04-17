@@ -1,97 +1,104 @@
 package org.example;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.example.CollectionsDemo.getSetOfPeopleOlder18;
+import static org.example.CollectionsDemo.getMapAge;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.*;
 
 public class HumanAgeFilterTest {
-
-    private Map<Integer, Human> humanMap;
-    private Map<Integer, Human> emptyMap;
-    private Map<Integer, Human> allAdultsMap;
-    private Map<Integer, Human> mixedAgesMap;
+    private Set<Human> humans;
+    private Human person20_1;
+    private Human person20_2;
+    private Human person25;
+    private Student student20;
 
     @BeforeEach
     public void setUp() {
-        // Основная мапа с разными возрастами
-        humanMap = new HashMap<>();
-        humanMap.put(1, new Human("Smith", "John", "Michael", 30));  // взрослый
-        humanMap.put(2, new Human("Johnson", "Alice", "Marie", 17));  // не взрослый
-        humanMap.put(3, new Student("Williams", "Bob", "James", 18, "CS")); // взрослый (ровно 18)
-        humanMap.put(4, new Human("Brown", "Emma", "Grace", 15));    // не взрослый
+        // Инициализация тестовых данных
+        person20_1 = new Human("Ivanov", "Ivan", "Ivanovich", 20);
+        person20_2 = new Human("Petrov", "Petr", "Petrovich", 20);
+        person25 = new Human("Sidorov", "Sidor", "Sidorovich", 25);
+        student20 = new Student("Abramov", "Alex", "Sergeevich", 20, "CS");
 
-        // Пустая мапа
-        emptyMap = Collections.emptyMap();
-
-        // Все взрослые
-        allAdultsMap = new HashMap<>();
-        allAdultsMap.put(1, new Human("Doe", "John", "A", 25));
-        allAdultsMap.put(2, new Human("Doe", "Jane", "B", 30));
-
-        // Смешанные возраста (только дети)
-        mixedAgesMap = new HashMap<>();
-        mixedAgesMap.put(1, new Student("Junior", "Mike", "C", 16, "Math"));
-        mixedAgesMap.put(2, new Student("Junior", "Anna", "D", 17, "Physics"));
+        humans = new HashSet<>();
+        humans.add(person20_1);
+        humans.add(person20_2);
+        humans.add(person25);
+        humans.add(student20);
     }
 
     @Test
-    public void testGetSetOfPeopleOlder18_NormalCase() {
-        Set<Human> result = getSetOfPeopleOlder18(humanMap);
+    public void testBasicAgeGrouping() {
+        Map<Integer, ArrayList<Human>> result = getMapAge(humans);
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(humanMap.get(1))); // 30 лет
-        assertTrue(result.contains(humanMap.get(3))); // 18 лет
-        assertFalse(result.contains(humanMap.get(2))); // 17 лет
-        assertFalse(result.contains(humanMap.get(4))); // 15 лет
+        // Проверка возраста 20
+        ArrayList<Human> expected20 = new ArrayList<>(Arrays.asList(
+                person20_1, person20_2, student20
+        ));
+        ArrayList<Human> actual20 = result.get(20);
+        assertEquals(expected20.size(), actual20.size());
+        assertTrue(actual20.containsAll(expected20));
+
+        // Проверка возраста 25
+        ArrayList<Human> expected25 = new ArrayList<>(Collections.singletonList(person25));
+        assertEquals(expected25, result.get(25));
     }
 
     @Test
-    public void testGetSetOfPeopleOlder18_AllAdults() {
-        Set<Human> result = getSetOfPeopleOlder18(allAdultsMap);
+    public void testSingleAgeGroup() {
+        humans.clear();
+        humans.add(person20_1);
+        humans.add(person20_2);
 
-        assertEquals(2, result.size());
-        assertTrue(result.containsAll(allAdultsMap.values()));
-    }
-
-    @Test
-    public void testGetSetOfPeopleOlder18_NoAdults() {
-        Set<Human> result = getSetOfPeopleOlder18(mixedAgesMap);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testGetSetOfPeopleOlder18_EmptyMap() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            getSetOfPeopleOlder18(emptyMap);
-        });
-    }
-
-
-    @Test
-    public void testGetSetOfPeopleOlder18_BorderlineAge18() {
-        Map<Integer, Human> borderlineMap = new HashMap<>();
-        borderlineMap.put(1, new Human("Border", "Case", "Test", 18));
-
-        Set<Human> result = getSetOfPeopleOlder18(borderlineMap);
+        Map<Integer, ArrayList<Human>> result = getMapAge(humans);
 
         assertEquals(1, result.size());
-        assertTrue(result.contains(borderlineMap.get(1)));
+        assertEquals(2, result.get(20).size());
     }
 
     @Test
-    public void testGetSetOfPeopleOlder18_BorderlineAge17() {
-        Map<Integer, Human> borderlineMap = new HashMap<>();
-        borderlineMap.put(1, new Human("Border", "Case", "Test", 17));
+    public void testAllUniqueAges() {
+        humans.clear();
+        humans.add(new Human("A", "B", "C", 18));
+        humans.add(new Human("D", "E", "F", 19));
+        humans.add(new Human("G", "H", "I", 20));
 
-        Set<Human> result = getSetOfPeopleOlder18(borderlineMap);
+        Map<Integer, ArrayList<Human>> result = getMapAge(humans);
 
-        assertTrue(result.isEmpty());
+        assertEquals(3, result.size());
+        assertEquals(1, result.get(18).size());
+        assertEquals(1, result.get(19).size());
+        assertEquals(1, result.get(20).size());
     }
 
+    @Test
+    public void testWithStudents() {
+        Map<Integer, ArrayList<Human>> result = getMapAge(humans);
 
+        ArrayList<Human> age20 = result.get(20);
+        assertTrue(age20.contains(student20));
+    }
+
+    @Test
+    public void testEmptyInput() {
+        humans.clear();
+        assertThrows(IllegalArgumentException.class, () -> getMapAge(humans));
+    }
+
+    @Test
+    public void testAgeZero() {
+        humans.add(new Human("Smith", "John", "Doe", 0));
+
+        Map<Integer, ArrayList<Human>> result = getMapAge(humans);
+        assertEquals(1, result.get(0).size());
+    }
+
+    @Test
+    public void testDuplicateHumans() {
+        humans.add(person20_1); // Добавляем дубликат
+
+        Map<Integer, ArrayList<Human>> result = getMapAge(humans);
+        assertEquals(3, result.get(20).size()); // Должны быть все три объекта
+    }
 }

@@ -5,77 +5,98 @@ import org.junit.jupiter.api.Test;
 
 import static org.example.CollectionsDemo.getSetOfPeopleByIdentifier;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.*;
 
 public class HumanMapTest {
-
     private Map<Integer, Human> humanMap;
-    private Set<Integer> idsToFind;
+    private Human ivanov;
+    private Human petrov;
+    private Human sidorov;
+    private Student student;
 
     @BeforeEach
     public void setUp() {
         // Инициализация тестовых данных
+        ivanov = new Human("Ivanov", "Ivan", "Ivanovich", 20);
+        petrov = new Human("Petrov", "Petr", "Petrovich", 25);
+        sidorov = new Human("Sidorov", "Sidor", "Sidorovich", 25);
+        student = new Student("Abramov", "Alex", "Sergeevich", 30, "Computer Science");
+
         humanMap = new HashMap<>();
-        humanMap.put(1, new Human("Smith", "John", "Michael", 30));
-        humanMap.put(2, new Human("Johnson", "Alice", "Marie", 25));
-        humanMap.put(3, new Student("Williams", "Bob", "James", 20, "Computer Science"));
-        humanMap.put(4, new Human("Brown", "Emma", "Grace", 35));
-
-        idsToFind = new HashSet<>(Arrays.asList(1, 3, 5)); // 5 нет в мапе
+        humanMap.put(1, ivanov);
+        humanMap.put(2, petrov);
+        humanMap.put(3, sidorov);
+        humanMap.put(4, student);
     }
 
     @Test
-    public void testGetSetOfPeopleByIdentifier_NormalCase() {
-        Set<Human> result = getSetOfPeopleByIdentifier(humanMap, idsToFind);
+    public void testBasicFunctionality() {
+        Set<Integer> ids = new HashSet<>(Arrays.asList(1, 3));
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(humanMap.get(1)));
-        assertTrue(result.contains(humanMap.get(3)));
-        assertFalse(result.contains(humanMap.get(2)));
+        HashSet<Human> expected = new HashSet<>(Arrays.asList(ivanov, sidorov));
+        HashSet<Human> result = getSetOfPeopleByIdentifier(humanMap, ids);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testGetSetOfPeopleByIdentifier_EmptyIdsSet() {
-        Set<Integer> emptyIds = Collections.emptySet();
-        Set<Human> result = getSetOfPeopleByIdentifier(humanMap, emptyIds);
+    public void testWithStudent() {
+        Set<Integer> ids = new HashSet<>(Collections.singletonList(4));
 
-        assertTrue(result.isEmpty());
+        HashSet<Human> expected = new HashSet<>(Collections.singletonList(student));
+        HashSet<Human> result = getSetOfPeopleByIdentifier(humanMap, ids);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testGetSetOfPeopleByIdentifier_NoMatches() {
-        Set<Integer> nonExistingIds = new HashSet<>(Arrays.asList(5, 6, 7));
-        Set<Human> result = getSetOfPeopleByIdentifier(humanMap, nonExistingIds);
+    public void testWithNonExistingIds() {
+        Set<Integer> ids = new HashSet<>(Arrays.asList(5, 6, 7));
 
-        assertTrue(result.isEmpty());
+        HashSet<Human> expected = new HashSet<>();
+        HashSet<Human> result = getSetOfPeopleByIdentifier(humanMap, ids);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testGetSetOfPeopleByIdentifier_AllMatches() {
-        Set<Integer> allExistingIds = new HashSet<>(Arrays.asList(1, 2, 3, 4));
-        Set<Human> result = getSetOfPeopleByIdentifier(humanMap, allExistingIds);
+    public void testMixedExistingAndNonExistingIds() {
+        Set<Integer> ids = new HashSet<>(Arrays.asList(1, 5, 2, 6));
 
-        assertEquals(4, result.size());
-        assertTrue(result.containsAll(humanMap.values()));
+        HashSet<Human> expected = new HashSet<>(Arrays.asList(ivanov, petrov));
+        HashSet<Human> result = getSetOfPeopleByIdentifier(humanMap, ids);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testGetSetOfPeopleByIdentifier_WithStudentObjects() {
-        Set<Integer> studentId = new HashSet<>(Collections.singletonList(3));
-        Set<Human> result = getSetOfPeopleByIdentifier(humanMap, studentId);
+    public void testEmptyIdsSet() {
+        Set<Integer> ids = new HashSet<>();
 
-        assertEquals(1, result.size());
-        Human student = result.iterator().next();
-        assertTrue(student instanceof Student);
-        assertEquals("Williams", student.getSurname());
+        HashSet<Human> expected = new HashSet<>();
+        HashSet<Human> result = getSetOfPeopleByIdentifier(humanMap, ids);
+
+        assertEquals(expected, result);
     }
 
-
     @Test
-    public void testGetSetOfPeopleByIdentifier_EmptyMap() {
+    public void testEmptyHumanMap() {
+        Map<Integer, Human> emptyMap = Collections.emptyMap();
+        Set<Integer> ids = new HashSet<>(Arrays.asList(1, 2));
+
         assertThrows(IllegalArgumentException.class, () -> {
-            getSetOfPeopleByIdentifier(Collections.emptyMap(), idsToFind);
+            getSetOfPeopleByIdentifier(emptyMap, ids);
+        });
+    }
+
+    @Test
+    public void testNullInput() {
+        assertThrows(NullPointerException.class, () -> {
+            getSetOfPeopleByIdentifier(null, new HashSet<>());
+        });
+
+        assertThrows(NullPointerException.class, () -> {
+            getSetOfPeopleByIdentifier(humanMap, null);
         });
     }
 }

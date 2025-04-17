@@ -5,91 +5,86 @@ import org.junit.jupiter.api.Test;
 
 import static org.example.CollectionsDemo.getSortedSet;
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 public class HumanSortTest {
-
-    private HashSet<Human> humans;
-    private HashSet<Human> humansWithSameSurnames;
-    private HashSet<Human> emptySet;
-    private HashSet<Human> studentsSet;
+    private Set<Human> humans;
+    private Human ivanov;
+    private Human petrov;
+    private Human sidorov;
+    private Student student;
 
     @BeforeEach
     public void setUp() {
-        // Initialize test data for different humans
+        // Инициализация тестовых данных
+        ivanov = new Human("Ivanov", "Ivan", "Ivanovich", 20);
+        petrov = new Human("Petrov", "Petr", "Petrovich", 25);
+        sidorov = new Human("Sidorov", "Sidor", "Sidorovich", 25);
+        student = new Student("Abramov", "Alex", "Sergeevich", 30, "Computer Science");
+
         humans = new HashSet<>();
-        humans.add(new Human("Smith", "John", "Michael", 30));
-        humans.add(new Human("Johnson", "Robert", "William", 25));
-        humans.add(new Human("Williams", "David", "James", 35));
-        humans.add(new Human("Brown", "Richard", "Joseph", 40));
-
-        // Initialize test data for humans with same surnames
-        humansWithSameSurnames = new HashSet<>();
-        humansWithSameSurnames.add(new Human("Smith", "William", "Thomas", 30));
-        humansWithSameSurnames.add(new Human("Smith", "John", "Edward", 25));
-        humansWithSameSurnames.add(new Human("Smith", "John", "Henry", 35));
-
-        // Initialize empty set
-        emptySet = new HashSet<>();
-
-        // Initialize set with students
-        studentsSet = new HashSet<>();
-        studentsSet.add(new Student("Davis", "Charles", "George", 23, "Physics"));
-        studentsSet.add(new Student("Anderson", "Thomas", "Paul", 21, "Mathematics"));
-        studentsSet.add(new Student("Davis", "Daniel", "Mark", 22, "Computer Scienc"));
+        humans.add(ivanov);
+        humans.add(petrov);
+        humans.add(sidorov);
     }
 
     @Test
-    public void testGetSortedSetWithDifferentHumans() {
-        ArrayList<Human> sorted = getSortedSet(humans);
+    public void testBasicSorting() {
+        // Ожидаемый порядок: Abramov, Ivanov, Petrov, Sidorov
+        humans.add(student); // Добавляем студента с фамилией "Abramov" (должен быть первым)
 
-        assertEquals("Brown", sorted.get(0).getSurname());
-        assertEquals("Johnson", sorted.get(1).getSurname());
-        assertEquals("Smith", sorted.get(2).getSurname());
-        assertEquals("Williams", sorted.get(3).getSurname());
+        ArrayList<Human> expected = new ArrayList<>(Arrays.asList(
+                student,  // Abramov
+                ivanov,   // Ivanov
+                petrov,   // Petrov
+                sidorov   // Sidorov
+        ));
+
+        ArrayList<Human> result = getSortedSet(humans);
+
+        assertEquals(expected, result, "Список должен быть отсортирован по ФИО");
     }
 
     @Test
-    public void testGetSortedSetWithSameSurnames() {
-        ArrayList<Human> sorted = getSortedSet(humansWithSameSurnames);
+    public void testWithEqualNames() {
+        // Добавляем человека с такой же фамилией, но именем, которое должно быть раньше по алфавиту
+        Human ivanov2 = new Human("Ivanov", "Alex", "Ivanovich", 22);
+        humans.add(ivanov2);
 
-        // Проверяем порядок при одинаковых фамилиях
-        assertEquals("John", sorted.get(0).getName());
-        assertEquals("Edward", sorted.get(0).getSecondname());  // Edward идет первым
+        ArrayList<Human> expected = new ArrayList<>(Arrays.asList(
+                ivanov2,  // Ivanov Alex (A раньше I)
+                ivanov,   // Ivanov Ivan
+                petrov,
+                sidorov
+        ));
 
-        assertEquals("John", sorted.get(1).getName());
-        assertEquals("Henry", sorted.get(1).getSecondname());  // Henry идет вторым
+        ArrayList<Human> result = getSortedSet(humans);
 
-        assertEquals("William", sorted.get(2).getName());
-        assertEquals("Thomas", sorted.get(2).getSecondname());
+        assertEquals(expected, result, "При одинаковых фамилиях сортировка по имени");
     }
 
     @Test
-    public void testGetSortedSetWithStudents() {
-        ArrayList<Human> sorted = getSortedSet(studentsSet);
+    public void testWithStudentsOnly() {
+        Set<Human> students = new HashSet<>();
+        Student s1 = new Student("Petrov", "A", "B", 20, "Math");
+        Student s2 = new Student("Ivanov", "B", "C", 21, "Physics");
+        students.add(s1);
+        students.add(s2);
 
-        // Проверяем порядок сортировки
-        assertEquals("Anderson", sorted.get(0).getSurname());
+        ArrayList<Human> expected = new ArrayList<>(Arrays.asList(s2, s1));
+        ArrayList<Human> result = getSortedSet(students);
 
-        assertEquals("Davis", sorted.get(1).getSurname());
-        assertEquals("Charles", sorted.get(1).getName());  // Charles идет перед Daniel
-
-        assertEquals("Davis", sorted.get(2).getSurname());
-        assertEquals("Daniel", sorted.get(2).getName());
-    }
-    @Test
-    public void testGetSortedSetWithEmptySet() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            getSortedSet(emptySet);
-        });
+        assertEquals(expected, result, "Должен работать с наследниками Human");
     }
 
     @Test
-    public void testGetSortedSetWithNullInput() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            getSortedSet(null);
-        });
+    public void testEmptyInput() {
+        Set<Human> emptySet = Collections.emptySet();
+        assertThrows(IllegalArgumentException.class, () -> getSortedSet(emptySet));
+    }
+
+    @Test
+    public void testNullInput() {
+        assertThrows(IllegalArgumentException.class, () -> getSortedSet(null));
     }
 }

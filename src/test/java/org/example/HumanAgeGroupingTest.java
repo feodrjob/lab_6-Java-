@@ -3,118 +3,97 @@ package org.example;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.example.CollectionsDemo.getMapAge;
+import static org.example.CollectionsDemo.changeKeysOnAge;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.*;
 
 public class HumanAgeGroupingTest {
-
-    private HashSet<Human> humans;
-    private HashSet<Human> emptySet;
-    private HashSet<Human> singlePersonSet;
-    private HashSet<Human> sameAgeGroup;
+    private Map<Integer, Human> humanMap;
+    private Human person1;
+    private Human person2;
+    private Student student1;
 
     @BeforeEach
     public void setUp() {
-        // Основной тестовый набор
-        humans = new HashSet<>();
-        humans.add(new Human("Smith", "John", "M", 25));
-        humans.add(new Human("Johnson", "Alice", "P", 30));
-        humans.add(new Student("Williams", "Bob", "Q", 25, "CS"));
-        humans.add(new Human("Brown", "Emma", "R", 30));
+        // Инициализация тестовых данных
+        person1 = new Human("Ivanov", "Ivan", "Ivanovich", 25);
+        person2 = new Human("Petrov", "Petr", "Petrovich", 30);
+        student1 = new Student("Sidorov", "Sidor", "Sidorovich", 20, "CS");
 
-        // Пустой набор
-        emptySet = new HashSet<>();
-
-        // Один человек
-        singlePersonSet = new HashSet<>();
-        singlePersonSet.add(new Human("Doe", "Jane", "S", 40));
-
-        // Все одного возраста
-        sameAgeGroup = new HashSet<>();
-        sameAgeGroup.add(new Human("Taylor", "Roy", "T", 20));
-        sameAgeGroup.add(new Student("Anderson", "Tom", "U", 20, "Math"));
+        humanMap = new HashMap<>();
+        humanMap.put(1, person1);
+        humanMap.put(2, person2);
+        humanMap.put(3, student1);
     }
 
     @Test
-    public void testGetMapAge_NormalCase() {
-        Map<Integer, ArrayList<Human>> result = getMapAge(humans);
+    public void testBasicAgeMapping() {
+        Map<Integer, Integer> expected = new HashMap<>();
+        expected.put(1, 25);
+        expected.put(2, 30);
+        expected.put(3, 20);
 
-        assertEquals(2, result.size()); // Два уникальных возраста
+        Map<Integer, Integer> result = changeKeysOnAge(humanMap);
 
-        // Проверяем группу 25 лет
-        ArrayList<Human> age25 = result.get(25);
-        assertEquals(2, age25.size());
-        assertTrue(age25.stream().anyMatch(h -> h.getSurname().equals("Smith")));
-        assertTrue(age25.stream().anyMatch(h -> h.getSurname().equals("Williams")));
-
-        // Проверяем группу 30 лет
-        ArrayList<Human> age30 = result.get(30);
-        assertEquals(2, age30.size());
-        assertTrue(age30.stream().anyMatch(h -> h.getSurname().equals("Johnson")));
-        assertTrue(age30.stream().anyMatch(h -> h.getSurname().equals("Brown")));
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testGetMapAge_SinglePerson() {
-        Map<Integer, ArrayList<Human>> result = getMapAge(singlePersonSet);
+    public void testWithDuplicateAges() {
+        humanMap.put(4, new Human("Kuznetsov", "Alex", "Sergeevich", 25)); // Дубликат возраста
 
-        assertEquals(1, result.size());
-        assertEquals(1, result.get(40).size());
-        assertEquals("Doe", result.get(40).get(0).getSurname());
+        Map<Integer, Integer> result = changeKeysOnAge(humanMap);
+
+        assertEquals(25, result.get(1));
+        assertEquals(25, result.get(4));
+        assertEquals(4, result.size());
     }
 
     @Test
-    public void testGetMapAge_SameAgeGroup() {
-        Map<Integer, ArrayList<Human>> result = getMapAge(sameAgeGroup);
+    public void testSingleEntry() {
+        humanMap.clear();
+        humanMap.put(1, person1);
 
-        assertEquals(1, result.size());
-        assertEquals(2, result.get(20).size());
+        Map<Integer, Integer> expected = Collections.singletonMap(1, 25);
+        Map<Integer, Integer> result = changeKeysOnAge(humanMap);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testGetMapAge_EmptyInput() {
+    public void testEmptyInput() {
+        humanMap.clear();
         assertThrows(IllegalArgumentException.class, () -> {
-            getMapAge(emptySet);
+            changeKeysOnAge(humanMap);
         });
     }
 
     @Test
-    public void testGetMapAge_WithStudents() {
-        HashSet<Human> mixedSet = new HashSet<>();
-        mixedSet.add(new Student("Wilson", "Eva", "V", 22, "Physics"));
-        mixedSet.add(new Human("Davis", "Liam", "W", 22));
-
-        Map<Integer, ArrayList<Human>> result = getMapAge(mixedSet);
-
-        assertEquals(1, result.size());
-        assertEquals(2, result.get(22).size());
-        assertTrue(result.get(22).get(0) instanceof Student || result.get(22).get(1) instanceof Student);
+    public void testNullInput() {
+        assertThrows(NullPointerException.class, () -> {
+            changeKeysOnAge(null);
+        });
     }
 
     @Test
-    public void testGetMapAge_AgeZero() {
-        HashSet<Human> zeroAgeSet = new HashSet<>();
-        zeroAgeSet.add(new Human("Miller", "Grace", "X", 0));
-
-        Map<Integer, ArrayList<Human>> result =getMapAge(zeroAgeSet);
-
-        assertEquals(1, result.size());
-        assertEquals(0, result.get(0).get(0).getAge());
+    public void testWithStudentAge() {
+        Map<Integer, Integer> result = changeKeysOnAge(humanMap);
+        assertEquals(20, result.get(3));
     }
 
     @Test
-    public void testGetMapAge_NoDuplicateEntries() {
-        // Проверяем что в группах нет дубликатов
-        Human person = new Human("Clark", "Bruce", "Y", 35);
-        HashSet<Human> setWithDuplicates = new HashSet<>();
-        setWithDuplicates.add(person);
-        setWithDuplicates.add(person); // HashSet не добавит дубликат
+    public void testAgeZero() {
+        humanMap.put(4, new Human("Smith", "John", "Doe", 0));
 
-        Map<Integer, ArrayList<Human>> result = getMapAge(setWithDuplicates);
+        Map<Integer, Integer> result = changeKeysOnAge(humanMap);
+        assertEquals(0, result.get(4));
+    }
 
-        assertEquals(1, result.size());
-        assertEquals(1, result.get(35).size());
+    @Test
+    public void testNegativeAge() {
+        humanMap.put(5, new Human("Doe", "Jane", "Smith", -1));
+
+        Map<Integer, Integer> result = changeKeysOnAge(humanMap);
+        assertEquals(-1, result.get(5));
     }
 }
